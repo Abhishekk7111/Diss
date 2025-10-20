@@ -1,11 +1,12 @@
 import streamlit as st
-import openai
 import os
+from openai import OpenAI
 
 st.set_page_config(page_title="ChatGPT Duel", layout="wide")
 st.title("🤖 ChatGPT-1 vs ChatGPT-2 Debate")
 
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+# Get API key from Streamlit secrets
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 question = st.text_input("Ask any question:")
 
@@ -22,16 +23,27 @@ if st.button("Start Debate") and question.strip() != "":
         st.subheader("ChatGPT-2")
 
     for i in range(rounds):
-        resp1 = openai.ChatCompletion.create(model="gpt-5", messages=chat1, temperature=0.7)
-        reply1 = resp1.choices[0].message.content.strip()
+        # ChatGPT-1 responds
+        resp1 = client.chat.completions.create(
+            model="gpt-5",
+            messages=chat1,
+            temperature=0.7
+        )
+        reply1 = resp1.choices[0].message.content
         chat1.append({"role": "assistant", "content": reply1})
         chat2.append({"role": "user", "content": reply1})
 
-        resp2 = openai.ChatCompletion.create(model="gpt-5", messages=chat2, temperature=0.7)
-        reply2 = resp2.choices[0].message.content.strip()
+        # ChatGPT-2 responds
+        resp2 = client.chat.completions.create(
+            model="gpt-5",
+            messages=chat2,
+            temperature=0.7
+        )
+        reply2 = resp2.choices[0].message.content
         chat2.append({"role": "assistant", "content": reply2})
         chat1.append({"role": "user", "content": reply2})
 
+        # Display side by side
         with col1:
             st.markdown(f"**Round {i+1}:** {reply1}")
         with col2:
