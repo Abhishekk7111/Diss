@@ -1,2 +1,5 @@
 streamlit
 openai
+streamlit
+openai>=1.35.0
+
